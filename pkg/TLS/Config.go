@@ -9,13 +9,13 @@ import (
 
 func GetConfig() *tls.Config {
 	certPool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile("certs/ca/ca.crt")
+	ca, err := ioutil.ReadFile("Auth/ca/ca.crt")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 	certPool.AppendCertsFromPEM(ca)
 
-	certificateKeyPair, certReadingErr := tls.LoadX509KeyPair("certs/client/client.crt", "certs/client/client.key")
+	certificateKeyPair, certReadingErr := tls.LoadX509KeyPair("Auth/client/client.crt", "Auth/client/client.key")
 
 	if certReadingErr != nil {
 		panic(certReadingErr)
