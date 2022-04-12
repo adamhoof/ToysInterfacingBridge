@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-type CommandBot struct {
+type ToyCommandBot struct {
 	bot *tb.Bot
 }
 
-func (telegramBot *CommandBot) SetToken(pathToToken string) {
+func (toyCommandBot *ToyCommandBot) SetToken(pathToToken string) {
 
 	token, err := ioutil.ReadFile(pathToToken)
 	formattedToken := strings.Split(string(token), "\n")
-	telegramBot.bot, err = tb.NewBot(tb.Settings{
+	toyCommandBot.bot, err = tb.NewBot(tb.Settings{
 		Token: formattedToken[0],
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
@@ -28,6 +28,6 @@ func (telegramBot *CommandBot) SetToken(pathToToken string) {
 	fmt.Println("bot created")
 }
 
-func (telegramBot *CommandBot) StartBot() {
-	telegramBot.bot.Start()
+func (toyCommandBot *ToyCommandBot) StartBot() {
+	toyCommandBot.bot.Start()
 }

@@ -7,22 +7,16 @@ import (
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/TelegramBot"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"os"
-	"sync"
 )
 
 var me = TelegramBot.MeUser{Id: os.Getenv("adminUser")}
 
-func defaultResponseHandler(toyName string, db Database.Database) func(client mqtt.Client, message mqtt.Message) {
+func defaultResponseHandler(toyName string, db Database.Database, bot TelegramBot.TelegramBot) func(client mqtt.Client, message mqtt.Message) {
 	handler := func(client mqtt.Client, message mqtt.Message) {
-
 		func() {
-			/*receivedMessage := string(message.Payload())
-			services.db.UpdateToyMode(toyName, receivedMessage)
-			_, err := services.botHandler.bot.Send(&me, toyName+": "+receivedMessage)
-			if err != nil {
-				return
-			}*/
-
+			receivedMessage := string(message.Payload())
+			db.UpdateToyMode(toyName, receivedMessage)
+			bot.SendTextMessage(&me, toyName+": "+receivedMessage)
 		}()
 	}
 	return handler
@@ -32,21 +26,15 @@ func main() {
 	Env.SetVariables()
 
 	db := Database.PostgresDatabase{}
-
-	var routineSyncer sync.WaitGroup
-	routineSyncer.Add(1)
-	go func(routineSyncer *sync.WaitGroup) {
-		defer routineSyncer.Done()
+	go func() {
 		db.Connect()
 		db.TestConnection()
-	}(&routineSyncer)
+	}()
 
 	mqttClient := MQTTs.CreateClient(MQTTs.GetClientConfig())
 	MQTTs.ConnectClient(&mqttClient)
 
-	bot := TelegramBot.CommandBot{}
-	bot.SetToken("Auth/BotToken")
-	bot.StartBot()
-
-	routineSyncer.Wait()
+	cmdBot := TelegramBot.ToyCommandBot{}
+	cmdBot.SetToken("Auth/BotToken")
+	cmdBot.StartBot()
 }
