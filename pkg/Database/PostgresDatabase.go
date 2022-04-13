@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Toy"
 	"github.com/lib/pq"
+	tb "gopkg.in/telebot.v3"
 	"os"
 	"strconv"
 )
@@ -67,7 +68,7 @@ func (postgres *PostgresDatabase) PullToysData(toyBag map[string]Toy.Toy) {
 	}(rows)
 
 	for rows.Next() {
-		toy := Toy.Toy{}
+		toy := Toy.Toy{Buttons: make(map[string]*tb.Btn)}
 		err = rows.Scan(&toy.Name, pq.Array(&toy.AvailableCommands), &toy.ID, &toy.PublishTopic, &toy.SubscribeTopic)
 		if err != nil {
 			fmt.Println("unable to fetch toy data into toy", err)

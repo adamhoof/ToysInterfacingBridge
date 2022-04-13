@@ -9,13 +9,11 @@ type Icon string
 type Command string
 
 type Factory struct {
-	ToyButtonTemplates map[Command]Icon
+	ToyButtonTemplates map[string]string
 }
 
-func (factory *Factory) GenerateToyCommandButtons(toyButtons *[]tb.Btn, unificator int, commands []string) {
+func (factory *Factory) GenerateToyCommandButtons(toyButtons map[string]*tb.Btn, unificator int, commands []string) {
 	for _, command := range commands {
-		func() {
-			*toyButtons = append(*toyButtons, tb.Btn{Unique: command + strconv.Itoa(unificator), Text: string(factory.ToyButtonTemplates[Command(command)])})
-		}()
+		toyButtons[command] = &tb.Btn{Unique: command + strconv.Itoa(unificator), Text: factory.ToyButtonTemplates[command]}
 	}
 }

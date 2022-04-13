@@ -46,7 +46,7 @@ func main() {
 	toyBag := make(map[string]Toy.Toy)
 	db.PullToysData(toyBag)
 
-	buttonFactory := Buttons.Factory{ToyButtonTemplates: map[Buttons.Command]Buttons.Icon{
+	buttonFactory := Buttons.Factory{ToyButtonTemplates: map[string]string{
 		"on":     "⬜",
 		"white":  "⬜",
 		"yellow": "\U0001F7E8",
@@ -60,7 +60,7 @@ func main() {
 		"0":      "🌚"}}
 
 	for _, toy := range toyBag {
-		buttonFactory.GenerateToyCommandButtons(&toy.Buttons, toy.ID, toy.AvailableCommands)
+		buttonFactory.GenerateToyCommandButtons(toy.Buttons, toy.ID, toy.AvailableCommands)
 	}
 
 	MQTTs.ConnectClient(&mqttClient)

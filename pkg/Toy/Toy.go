@@ -8,7 +8,7 @@ type Toy struct {
 	Name              string
 	ID                int
 	AvailableCommands []string
-	Buttons           []tb.Btn
+	Buttons           map[string]*tb.Btn
 	PublishTopic      string
 	SubscribeTopic    string
 	KeyboardName      string
