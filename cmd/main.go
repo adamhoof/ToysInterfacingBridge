@@ -1,15 +1,18 @@
 package main
 
 import (
+	"github.com/adamhoof/ToysInterfacingBridge/pkg/Buttons"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Database"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Env"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/MQTTs"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/TelegramBot"
+	"github.com/adamhoof/ToysInterfacingBridge/pkg/Toy"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"os"
+	"sync"
 )
 
-var me = TelegramBot.MeUser{Id: os.Getenv("adminUser")}
+var me = TelegramBot.MeUser{}
 
 func defaultResponseHandler(toyName string, db Database.Database, bot TelegramBot.TelegramBot) func(client mqtt.Client, message mqtt.Message) {
 	handler := func(client mqtt.Client, message mqtt.Message) {
@@ -24,6 +27,7 @@ func defaultResponseHandler(toyName string, db Database.Database, bot TelegramBo
 
 func main() {
 	Env.SetVariables()
+	me.Id = os.Getenv("telegramID")
 
 	db := Database.PostgresDatabase{}
 	go func() {
@@ -31,10 +35,37 @@ func main() {
 		db.TestConnection()
 	}()
 
+	toyCommandBot := TelegramBot.ToyCommandBot{}
+	go func() {
+		toyCommandBot.SetToken("Auth/BotToken")
+		toyCommandBot.StartBot()
+	}()
+
 	mqttClient := MQTTs.CreateClient(MQTTs.GetClientConfig())
+
+	toyBag := make(map[string]Toy.Toy)
+	db.PullToysData(toyBag)
+
+	buttonFactory := Buttons.Factory{ToyButtonTemplates: map[Buttons.Command]Buttons.Icon{
+		"on":     "⬜",
+		"white":  "⬜",
+		"yellow": "\U0001F7E8",
+		"blue":   "\U0001F7E6",
+		"green":  "\U0001F7E9",
+		"red":    "\U0001F7E5",
+		"pink":   "\U0001F7EA",
+		"orange": "\U0001F7E7",
+		"off":    "🚫",
+		"1":      "🌞",
+		"0":      "🌚"}}
+
+	for _, toy := range toyBag {
+		buttonFactory.GenerateToyCommandButtons(&toy.Buttons, toy.ID, toy.AvailableCommands)
+	}
+
 	MQTTs.ConnectClient(&mqttClient)
 
-	cmdBot := TelegramBot.ToyCommandBot{}
-	cmdBot.SetToken("Auth/BotToken")
-	cmdBot.StartBot()
+	routineSyncer := sync.WaitGroup{}
+	routineSyncer.Add(1)
+	routineSyncer.Wait()
 }

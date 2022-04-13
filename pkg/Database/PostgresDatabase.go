@@ -54,7 +54,7 @@ func (postgres *PostgresDatabase) UpdateToyMode(toyName string, toyMode string) 
 	}
 }
 
-func (postgres *PostgresDatabase) PullToyData(toyBag map[string]*Toy.Toy) {
+func (postgres *PostgresDatabase) PullToysData(toyBag map[string]Toy.Toy) {
 	rows, err := postgres.db.Query(toysDataQuery)
 	if err != nil {
 		fmt.Println("unable to query data", err)
@@ -72,6 +72,6 @@ func (postgres *PostgresDatabase) PullToyData(toyBag map[string]*Toy.Toy) {
 		if err != nil {
 			fmt.Println("unable to fetch toy data into toy", err)
 		}
-		toyBag[toy.Name] = &toy
+		toyBag[toy.Name] = toy
 	}
 }
