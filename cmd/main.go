@@ -4,6 +4,7 @@ import (
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Buttons"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Database"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Env"
+	"github.com/adamhoof/ToysInterfacingBridge/pkg/Keyboards"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/MQTTs"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/TelegramBot"
 	"github.com/adamhoof/ToysInterfacingBridge/pkg/Toy"
@@ -58,9 +59,11 @@ func main() {
 		"off":    "🚫",
 		"1":      "🌞",
 		"0":      "🌚"}}
+	keyboardFactory := Keyboards.KeyboardFactory{MenuButtonTemplates: make(map[string]string)}
 
 	for _, toy := range toyBag {
 		buttonFactory.GenerateToyCommandButtons(toy.Buttons, toy.ID, toy.AvailableCommands)
+		toy.Keyboard = keyboardFactory.GenerateToyCommandsKeyboard(toy.Buttons)
 	}
 
 	MQTTs.ConnectClient(&mqttClient)
